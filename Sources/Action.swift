@@ -397,30 +397,18 @@ extension Action {
 		_ transformOutput: @escaping (Output) -> Output2,
 		_ transformError: @escaping (Error) -> Error2
 	) -> Action<Input2, Output2, Error2> {
-		return Action<Input2, Output2, Error2>(
-			execute: { input in
-				self.execute(transformInput(input))
-					.map(transformOutput)
-					.mapError { $0.map(transformError) }
-			},
-			deinitToken: deinitToken,
-			lifetime: lifetime,
-			events: events.map { event in
-				switch event {
-				case let .value(value):
-					return .value(transformOutput(value))
-				case let .failed(error):
-					return .failed(transformError(error))
-				case .completed:
-					return .completed
-				case .interrupted:
-					return .interrupted
+		return Action<Input2, Output2, Error2>.init(enabledIf: self.isEnabled, execute: { input in
+			self.execute(transformInput(input))
+				.map(transformOutput)
+				.flatMapError { error in
+					switch error {
+					case .disabled:
+						return .empty
+					case let .producerFailed(error):
+						return .init(error: transformError(error))
+					}
 				}
-			},
-			disabledErrors: disabledErrors,
-			isExecuting: isExecuting,
-			isEnabled: isEnabled
-		)
+		})
 	}
 }
 

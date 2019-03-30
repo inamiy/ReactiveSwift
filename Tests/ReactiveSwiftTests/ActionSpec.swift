@@ -483,13 +483,13 @@ class ActionSpec: QuickSpec {
 				action.apply(3).start()
 
 				expect(values) == [1, 2, 3]
-				expect(values2) == ["1", "2", "3"]
+				expect(values2) == []
 
 				action2.apply(4).start()
 				action2.apply(5).start()
 
 				expect(values) == [1, 2, 3, 4, 5]
-				expect(values2) == ["1", "2", "3", "4", "5"]
+				expect(values2) == ["4", "5"]
 			}
 
 			it("maps error") {
@@ -511,13 +511,13 @@ class ActionSpec: QuickSpec {
 				action.apply(3).start()
 
 				expect(errors) == [1, 2, 3].map(Error.init)
-				expect(errors2) == [1, 2, 3].map(Error.init).map(Error2.init)
+				expect(errors2) == [].map(Error.init).map(Error2.init)
 
 				action2.apply(4).start()
 				action2.apply(5).start()
 
 				expect(errors) == [1, 2, 3, 4, 5].map(Error.init)
-				expect(errors2) == [1, 2, 3, 4, 5].map(Error.init).map(Error2.init)
+				expect(errors2) == [4, 5].map(Error.init).map(Error2.init)
 			}
 
 			it("contramaps input") {
@@ -537,14 +537,14 @@ class ActionSpec: QuickSpec {
 				action.apply(3).start()
 
 				expect(values) == [1, 2, 3]
-				expect(values2) == [1, 2, 3]
+				expect(values2) == []
 
 				action2.apply("4").start()
 				action2.apply("foo").start()
 				action2.apply("5").start()
 
 				expect(values) == [1, 2, 3, 4, -1, 5]
-				expect(values2) == [1, 2, 3, 4, -1, 5]
+				expect(values2) == [4, -1, 5]
 			}
 		}
 	}
